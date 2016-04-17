@@ -44,20 +44,17 @@ public class AuthenticationFilter implements Filter {
             }
         }
         
-        if(access_cookie == null && !(uri.endsWith("html") || uri.endsWith("login"))){
-            this.context.log("Unauthorized access request");
-            res.sendRedirect("login.html");
+        if(access_cookie == null && !(uri.contains("html") || uri.endsWith("login"))){
+            this.context.log("1 - Unauthorized access request");
+        	if( request.getParameter("uri")!=null )
+        	{
+            	HttpSession session = req.getSession();
+            	session.setAttribute("callback", request.getParameter("uri"));
+        	}
+        	res.sendRedirect("login.html");
         }else{
-        	if( uri.endsWith("/data") ) 
-        	{
-        	   // pass the request along the filter chain
-               chain.doFilter(request, response);
-        	}
-        	else
-        	{
-          	  // pass the request along the filter chain
-              chain.doFilter(request, response);
-        	}
+        	// pass the request along the filter chain
+            chain.doFilter(request, response);
         }
     }
  

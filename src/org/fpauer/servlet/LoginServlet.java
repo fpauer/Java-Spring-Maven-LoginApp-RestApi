@@ -14,6 +14,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.fpauer.filters.Config;
 import org.fpauer.json.*;
@@ -25,8 +26,7 @@ import org.fpauer.json.*;
 public class LoginServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
  
-    protected void doPost(HttpServletRequest request,
-            HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
  
         // get request parameters for userID and password
         String user = request.getParameter("user");
@@ -63,8 +63,17 @@ public class LoginServlet extends HttpServlet {
 	        if ( json != null && json.has("lookup") ) {
 	            Cookie accessCookie = new Cookie( Config.COOKIE_NAME, json.getString("accessToken"));
 	            accessCookie.setMaxAge(30*60);
+	            accessCookie.setPath("/");
 	            response.addCookie(accessCookie);
-	            response.sendRedirect("LoginSuccess.jsp");
+
+            	HttpSession session = request.getSession();
+            	if( session.getAttribute("callback") != null )
+            	{
+            		response.sendRedirect(session.getAttribute("callback").toString());
+            	}
+            	else 
+	            	response.sendRedirect("LoginSuccess.jsp");
+            	
 	        } else {
 	            RequestDispatcher rd = getServletContext().getRequestDispatcher("/login.html");
 	            PrintWriter out= response.getWriter();
