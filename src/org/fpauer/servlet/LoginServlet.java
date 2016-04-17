@@ -61,7 +61,8 @@ public class LoginServlet extends HttpServlet {
 			conn.disconnect();
 			
 	        if ( json != null && json.has("lookup") ) {
-	            Cookie accessCookie = new Cookie( Config.COOKIE_NAME, json.getString("accessToken"));
+	        	String value = "{\"Status\":\"OK\",\"acessToken\":\""+json.getString("accessToken")+"\",\"userData\":"+json.get("lookup").toString()+"}";
+	        	Cookie accessCookie = new Cookie( Config.COOKIE_NAME, value);
 	            accessCookie.setMaxAge(30*60);
 	            accessCookie.setPath("/");
 	            response.addCookie(accessCookie);

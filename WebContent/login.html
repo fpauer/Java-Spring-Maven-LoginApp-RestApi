@@ -2,17 +2,40 @@
 <html>
 <head>
 <meta charset="US-ASCII">
-<title>Login Page</title>
+<title>Login App</title>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
 </head>
 <body>
- 
-<form action="login" method="post">
- 
-Username: <input type="text" name="user">
-<br>
-Password: <input type="password" name="pwd">
-<br>
-<input type="submit" value="Login">
-</form>
+
+<div class="container">
+	<div class="row">
+        <div class="col-md-3 col-md-offset-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">LDAP SSO Login page</h3>
+                </div>
+                <div class="panel-body">
+                    <form action="login" method="post">
+                        <fieldset>
+                            <div class="form-group">
+                                <input class="form-control" placeholder="User name" name="user" type="text" autofocus>
+                            </div>
+                            <div class="form-group">
+                                <input class="form-control" placeholder="Password" name="pwd" type="password" value="">
+                            </div>
+                            <!-- Change this to a button or input when using this as a form -->
+                            <input type="submit" class="btn btn-primary btn-block" value="Login" />
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
