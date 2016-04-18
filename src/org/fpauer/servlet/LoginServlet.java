@@ -26,33 +26,40 @@ import org.fpauer.json.*;
 public class LoginServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
  
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
  
         // get request parameters for userID and password
         String user = request.getParameter("user");
         String pwd = request.getParameter("pwd");
 
         StringBuilder sUrl = new StringBuilder();
-        sUrl.append("http://").append("127.0.1.1").append(":").append("9998").append("/auth/ldap/")
-        .append(user).append("/").append(pwd);
+        sUrl.append("http://").append(Config.get(Config.Keys.HOST)).append(":").append(Config.get(Config.Keys.PORT))
+        .append(Config.get(Config.Keys.REST_PATH)).append(user).append("/").append(pwd);
 		
 		URL url = new URL(sUrl.toString());
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
 		conn.setRequestProperty("Accept", "application/json");
-
+		
 		if (conn.getResponseCode() != 200) {
 
 			if (conn.getResponseCode() == 401) 
 			{
-	            RequestDispatcher rd = getServletContext().getRequestDispatcher("/login.html");
-	            PrintWriter out= response.getWriter();
-	            out.println("<font color=red>Either user name or password is wrong.</font>");
-	            rd.include(request, response);				
+				try
+				{
+		            RequestDispatcher rd = getServletContext().getRequestDispatcher("/login.html");
+		            PrintWriter out= response.getWriter();
+		            out.println("<font color=red>"+Config.get(Config.Keys.MESSAGE_LOGIN_ERROR)+"</font>");
+		            rd.include(request, response);
+				}			
+				catch(NullPointerException e)
+				{
+					throw new ServletException(Config.get(Config.Keys.MESSAGE_LOGIN_ERROR));
+				}
 			}
 			else
 			{
-				throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+				throw new RuntimeException("Failed : " + sUrl.toString() + "HTTP error code : " + conn.getResponseCode());
 			}
 		}
 		else
@@ -62,13 +69,13 @@ public class LoginServlet extends HttpServlet {
 			
 	        if ( json != null && json.has("lookup") ) {
 	        	String value = "{\"Status\":\"OK\",\"acessToken\":\""+json.getString("accessToken")+"\",\"userData\":"+json.get("lookup").toString()+"}";
-	        	Cookie accessCookie = new Cookie( Config.COOKIE_NAME, value);
+	        	Cookie accessCookie = new Cookie( Config.get(Config.Keys.COOKIE_NAME), value);
 	            accessCookie.setMaxAge(30*60);
 	            accessCookie.setPath("/");
 	            response.addCookie(accessCookie);
 
             	HttpSession session = request.getSession();
-            	if( session.getAttribute("callback") != null )
+            	if( session != null && session.getAttribute("callback") != null )
             	{
             		response.sendRedirect(session.getAttribute("callback").toString());
             	}
@@ -78,7 +85,7 @@ public class LoginServlet extends HttpServlet {
 	        } else {
 	            RequestDispatcher rd = getServletContext().getRequestDispatcher("/login.html");
 	            PrintWriter out= response.getWriter();
-	            out.println("<font color=red>Either user name or password is wrong.</font>");
+	            out.println("<font color=red>"+Config.get(Config.Keys.MESSAGE_LOGIN_ERROR)+"</font>");
 	            rd.include(request, response);
 	        }
 		}
@@ -96,7 +103,6 @@ public class LoginServlet extends HttpServlet {
 			}
 			if(!data.isEmpty())
 			{
-				System.out.println("getResponseData:" + data);
 				json = new JSONObject(data);
 			}
 		} catch (IOException e) {

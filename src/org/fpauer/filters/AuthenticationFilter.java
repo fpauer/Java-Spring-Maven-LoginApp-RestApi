@@ -31,13 +31,13 @@ public class AuthenticationFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
          
         String uri = req.getRequestURI();
-        this.context.log("AuthenticationFilter Requested Resource::"+uri);
+        //this.context.log("AuthenticationFilter Requested Resource::"+uri);
          
         Cookie[] cookies = req.getCookies();
         Cookie access_cookie = null;
         if(cookies != null){
             for(Cookie cookie : cookies){
-            	if( Config.COOKIE_NAME.equals(cookie.getName()) )
+            	if( Config.get(Config.Keys.COOKIE_NAME).equals(cookie.getName()) )
             	{
             		access_cookie = cookie;
             	}
@@ -45,7 +45,7 @@ public class AuthenticationFilter implements Filter {
         }
         
         if(access_cookie == null && !(uri.contains("html") || uri.endsWith("login"))){
-            this.context.log("1 - Unauthorized access request");
+            //this.context.log("1 - Unauthorized access request");
         	if( request.getParameter("uri")!=null )
         	{
             	HttpSession session = req.getSession();
