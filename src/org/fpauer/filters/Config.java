@@ -10,7 +10,7 @@ public class Config {
 	
 	public static enum Keys {
         HOST("server.host"), PORT("server.port"), REST_PATH("server.path"), 
-        COOKIE_NAME("cookie.name"), MESSAGE_LOGIN_ERROR("message.login.error"), ;
+        COOKIE_NAME("cookie.name"), JSON_LOGIN_ERROR("json.login.error"), MESSAGE_LOGIN_ERROR("message.login.error"), ;
 
         private final String key;
 
@@ -29,7 +29,7 @@ public class Config {
     static {
         try {
         	ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            serverConfig.load( classLoader.getResourceAsStream("/config.properties") );
+            serverConfig.load( classLoader.getResourceAsStream("config.properties") );
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

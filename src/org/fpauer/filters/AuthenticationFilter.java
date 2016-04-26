@@ -52,9 +52,21 @@ public class AuthenticationFilter implements Filter {
             	session.setAttribute("callback", request.getParameter("uri"));
         	}
         	res.sendRedirect("login.html");
-        }else{
-        	// pass the request along the filter chain
-            chain.doFilter(request, response);
+        } else if(access_cookie == null || access_cookie.getValue().isEmpty()){
+    		response.setContentType("application/json");
+        	res.getOutputStream().write(Config.get(Config.Keys.JSON_LOGIN_ERROR).getBytes());
+        } else {
+            this.context.log("Has cookie");
+        	if( uri.endsWith("/data") ) 
+        	{
+        	   // pass the request along the filter chain
+               chain.doFilter(request, response);
+        	}
+         	else
+        	{
+          	  // pass the request along the filter chain
+              chain.doFilter(request, response);
+        	}
         }
     }
  

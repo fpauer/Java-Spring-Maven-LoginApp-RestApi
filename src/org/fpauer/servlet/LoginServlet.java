@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
@@ -32,6 +34,12 @@ public class LoginServlet extends HttpServlet {
         String user = request.getParameter("user");
         String pwd = request.getParameter("pwd");
 
+        if(user.isEmpty() || pwd.isEmpty())
+        {            
+        	emitMessage(Config.get(Config.Keys.MESSAGE_LOGIN_ERROR), request, response);
+        	return;
+        }
+        
         StringBuilder sUrl = new StringBuilder();
         sUrl.append("http://").append(Config.get(Config.Keys.HOST)).append(":").append(Config.get(Config.Keys.PORT))
         .append(Config.get(Config.Keys.REST_PATH)).append(user).append("/").append(pwd);
@@ -40,26 +48,28 @@ public class LoginServlet extends HttpServlet {
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
 		conn.setRequestProperty("Accept", "application/json");
-		
-		if (conn.getResponseCode() != 200) {
 
-			if (conn.getResponseCode() == 401) 
+		int responseCode = -1;
+		
+		try
+		{
+			responseCode = conn.getResponseCode();
+		}
+		catch(ConnectException e)
+		{
+			emitMessage("Failed to load HTTP: " + sUrl.toString(), request, response);
+            return;
+		}
+		
+		if (responseCode != 200) {
+
+			if (responseCode == 401) 
 			{
-				try
-				{
-		            RequestDispatcher rd = getServletContext().getRequestDispatcher("/login.html");
-		            PrintWriter out= response.getWriter();
-		            out.println("<font color=red>"+Config.get(Config.Keys.MESSAGE_LOGIN_ERROR)+"</font>");
-		            rd.include(request, response);
-				}			
-				catch(NullPointerException e)
-				{
-					throw new ServletException(Config.get(Config.Keys.MESSAGE_LOGIN_ERROR));
-				}
+				emitMessage(Config.get(Config.Keys.MESSAGE_LOGIN_ERROR), request, response);
 			}
 			else
 			{
-				throw new RuntimeException("Failed : " + sUrl.toString() + "HTTP error code : " + conn.getResponseCode());
+				emitMessage("Failed : " + sUrl.toString() + "HTTP error code : " + responseCode, request, response);
 			}
 		}
 		else
@@ -83,13 +93,27 @@ public class LoginServlet extends HttpServlet {
 	            	response.sendRedirect("LoginSuccess.jsp");
             	
 	        } else {
-	            RequestDispatcher rd = getServletContext().getRequestDispatcher("/login.html");
-	            PrintWriter out= response.getWriter();
-	            out.println("<font color=red>"+Config.get(Config.Keys.MESSAGE_LOGIN_ERROR)+"</font>");
-	            rd.include(request, response);
+	        	emitMessage(Config.get(Config.Keys.MESSAGE_LOGIN_ERROR), request, response);
 	        }
 		}
     }
+
+    private RequestDispatcher emitMessage(String message, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+    {
+    	try
+		{
+            RequestDispatcher rd = getServletContext().getRequestDispatcher("/login.html");
+            PrintWriter out= response.getWriter();
+            out.println("<font color=red>"+message+"</font>");
+            rd.include(request, response);
+            return rd;
+		}			
+		catch(NullPointerException e)
+		{
+			throw new ServletException(message);
+		}
+    }
+    
     
     private JSONObject getResponseData(HttpURLConnection conn)
     {
