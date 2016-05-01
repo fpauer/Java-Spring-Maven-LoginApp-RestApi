@@ -1,15 +1,27 @@
+/**
+ * Copyright 2016 fpauer
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.fpauer.servlet;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
@@ -19,9 +31,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.fpauer.filters.Config;
-import org.fpauer.json.*;
+import org.fpauer.json.JSONObject;
  
 /**
+ * @author fpauer
+ * 
  * Servlet implementation class LoginServlet
  */
 @WebServlet("/login")
@@ -74,7 +88,7 @@ public class LoginServlet extends HttpServlet {
 		}
 		else
 		{
-			JSONObject json = getResponseData(conn);
+			JSONObject json = Utils.INSTANCE.getResponseData(conn);
 			conn.disconnect();
 			
 	        if ( json != null && json.has("lookup") ) {
@@ -112,28 +126,6 @@ public class LoginServlet extends HttpServlet {
 		{
 			throw new ServletException(message);
 		}
-    }
-    
-    
-    private JSONObject getResponseData(HttpURLConnection conn)
-    {
-    	JSONObject json = null;
-		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-			String output = null;
-			String data = "";
-			while ((output = br.readLine()) != null) {
-				data += output;
-			}
-			if(!data.isEmpty())
-			{
-				json = new JSONObject(data);
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return json;
     }
  
 }
